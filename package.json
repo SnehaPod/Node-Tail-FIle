@@ -1,0 +1,11 @@
+{
+  "name": "node-assignment",
+  "version": "1.0.0",
+  "description": "Node application to display last N lines of a file.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Sneha Poduval",
+  "license": "ISC"
+}
