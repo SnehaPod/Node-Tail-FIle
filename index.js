@@ -1,41 +1,58 @@
 const app = require("express")();
 const fs = require("fs");
 const ejs = require("ejs");
-const http = require("http");
+const bodyParser = require("body-parser");
 
+app.use(bodyParser.json())
 app.set('view engine', 'ejs');
 
 app.get('/', function (req, res) {
-    
-    res.render('index');
+    let fileContents = [];
+
+    res.render('index', {
+        fileContents: fileContents
+    });
 });
 
-app.post('/read-file', function(req, res) {
-    console.log('API hit');
-    let noOfLines = req.body ? req.body.noOfLines: 10;
-    let fileContents = [];
-    let data = fs.readFileSync("./test.txt", 'utf8');
+app.get('/read-file', function (req, res) {
+    readNLines(req).then(fileContents => {
+        res.json({
+            fileContents: fileContents
+        })
+    })
 
-    let lines = data.split(/\r?\n/);
-    if (lines.length > 0) {
-        for (var l = lines.length - 1; l >= lines.length - noOfLines; l--) {
-            fileContents.push(lines[l]);
-        }
-    }
+})
 
-    res.render("fileContent", {
-        fileContents: fileContents
+fs.watchFile("./test.txt", (err, result) => {
+    readNLines(null).then(fileContents => {
+        fileContents.forEach(element => {
+            console.log(element);    
+        });
     })
 })
 
+function readNLines(req) {
+    return new Promise((resolve, reject) => {
+        let noOfLines = (req && req.query && req.query.noOfLines) ? req.query.noOfLines : 10;
+        let fileContents = [];
+        let data = fs.readFileSync("./test.txt", 'utf8');
 
-fs.watchFile("./test.txt", (err, result) => {
-    let options = {};
-    options.path = "/";
-    options.port = 8080;
-    http.request(options, (err, response, body) => {
-        console.log('body', body);
+        let lines = data.split(/\r?\n/);
+        if (lines.length > 0) {
+            for (var l = lines.length - 1; l >= lines.length - noOfLines; l--) {
+                if(lines[l]) {
+                    fileContents.push(lines[l]);
+                }
+            }
+            resolve(fileContents);
+        }
     })
+}
+
+readNLines(null).then(fileContents => {
+    fileContents.forEach(element => {
+        console.log(element);    
+    });
 })
 
 app.listen(8080, () => {

@@ -1,0 +1,212 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+        integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <style>
+        @import url(https://fonts.googleapis.com/css?family=Roboto:400,300,600,400italic);
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-box-sizing: border-box;
+            -moz-box-sizing: border-box;
+            -webkit-font-smoothing: antialiased;
+            -moz-font-smoothing: antialiased;
+            -o-font-smoothing: antialiased;
+            font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+
+        body {
+            font-family: "Roboto", Helvetica, Arial, sans-serif;
+            font-weight: 100;
+            font-size: 12px;
+            line-height: 30px;
+            color: #777;
+            background: #4CAF50;
+        }
+
+        .container {
+            /* max-width: 400px; */
+            width: 100%;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #form input[type="text"],
+        #form button {
+            font: 400 12px/16px "Roboto", Helvetica, Arial, sans-serif;
+        }
+
+        #form {
+            max-width: 400px;
+            background: #F9F9F9;
+            padding: 25px;
+            margin: 50 50;
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        }
+
+        #form h3 {
+            display: block;
+            font-size: 30px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        fieldset {
+            border: medium none !important;
+            margin: 0 0 10px;
+            min-width: 100%;
+            padding: 0;
+            width: 100%;
+        }
+
+        #form input[type="text"] {
+            width: 100%;
+            border: 1px solid #ccc;
+            background: #FFF;
+            margin: 0 0 5px;
+            padding: 10px;
+        }
+
+        #form input[type="text"]:hover {
+            -webkit-transition: border-color 0.3s ease-in-out;
+            -moz-transition: border-color 0.3s ease-in-out;
+            transition: border-color 0.3s ease-in-out;
+            border: 1px solid #aaa;
+        }
+
+        #form button {
+            cursor: pointer;
+            width: 100%;
+            border: none;
+            background: #4CAF50;
+            color: #FFF;
+            margin: 0 0 5px;
+            padding: 10px;
+            font-size: 15px;
+        }
+
+        #form button:hover {
+            background: #43A047;
+            -webkit-transition: background 0.3s ease-in-out;
+            -moz-transition: background 0.3s ease-in-out;
+            transition: background-color 0.3s ease-in-out;
+        }
+
+        #form button:active {
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        #form input:focus {
+            outline: 0;
+            border: 1px solid #aaa;
+        }
+
+        #result {
+            width: 100%;
+            background: #F9F9F9;
+            padding: 25px;
+            margin: 50 200;
+            box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);
+        }
+
+        #result h3 {
+            display: block;
+            font-size: 30px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        #result h4 {
+            margin: 5px 0 15px;
+            display: block;
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        #list {
+            list-style-type: none;
+        }
+
+        ::-webkit-input-placeholder {
+            color: #888;
+        }
+
+        :-moz-placeholder {
+            color: #888;
+        }
+
+        ::-moz-placeholder {
+            color: #888;
+        }
+
+        :-ms-input-placeholder {
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row" style="display: flex;">
+            <div class="col">
+                <form id="form" onsubmit="fetchFileLines(event)">
+                    <h3>Input the number of lines</h3>
+                    <fieldset>
+                        <input placeholder="Enter a number" id="noOfLines" type="text" pattern="[0-9]{1,}" tabindex="1" required autofocus>
+                    </fieldset>
+                    <fieldset>
+                        <button name="submit" type="submit" id="contact-submit" data-submit="...Sending">Submit</button>
+                        <button id="reset">Reset</button>
+                    </fieldset>
+                </form>
+            </div>
+    
+            <div class="col">
+                <div id="result">
+                    <h3>Output: </h3>
+                    <ul id="list">
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU="
+    crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    function fetchFileLines(e) {
+        e.preventDefault();
+        var noOfLines = $("#noOfLines").val();
+        $.ajax({
+            url: '/read-file',
+            type: 'get',
+            data: { noOfLines: noOfLines },
+            success: function (data, textStatus, jQxhr) {
+                if (data.fileContents) {
+                    $("#list").children().remove();
+                    for (var i = 0; i < data.fileContents.length; i++) {
+                        $('#list').append('<li>' + data.fileContents[i] + '</li>')
+                    }
+                }
+            },
+            error: function (jqXhr, textStatus, errorThrown) {
+                console.log('jqXhr', jqXhr)
+                console.log('textStatus', textStatus)
+                console.log(errorThrown);
+            }
+        });
+    }
+
+    $("#reset").click(function() {
+        $("#noOfLines").val("");
+        $("#list").children().remove();
+    })
+</script>
+
+</html>
