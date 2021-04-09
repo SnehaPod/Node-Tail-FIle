@@ -1,4 +1,4 @@
-# NodeTailAssignment
+# Tail File using Node app
 This application displays the last N lines of a file in real time.
 
 For user input N lines:
